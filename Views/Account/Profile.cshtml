@@ -1,0 +1,14 @@
+﻿@model Project.ViewModels.Account.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<h2 class="mb-4">My Profile</h2>
+
+<div class="card p-3">
+    <p><strong>User ID:</strong> @Model.UserId</p>
+    <p><strong>Username:</strong> @Model.UserName</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Role:</strong> @Model.Role</p>
+</div>

@@ -99,7 +99,30 @@ namespace Project.Controllers
             return View();
         }
 
-        [HttpPost]
+
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var model = new ProfileViewModel
+            {
+                UserId = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                Role = roles.FirstOrDefault() ?? "User"
+            };
+            return View(model);
+        }
+
+            [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
