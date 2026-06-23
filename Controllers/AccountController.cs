@@ -80,7 +80,9 @@ namespace Project.Controllers
                 FirstName = model.FirstName.Trim(),
                 Surname = model.Surname.Trim(),
                 Email = cleanEmail,
-                PhoneNumber = model.PhoneNumber?.Trim()
+                PhoneNumber = model.PhoneNumber?.Trim(),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.AppUsers.Add(applicationUser);
@@ -110,17 +112,31 @@ namespace Project.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            var appUser = await _context.AppUsers
+                .FirstOrDefaultAsync(u => u.IdentityUserId == user.Id);
+
+            if (appUser == null)
+            {
+                return NotFound();
+            }
+
             var roles = await _userManager.GetRolesAsync(user);
 
             var model = new ProfileViewModel
             {
-                UserId = user.Id,
-                Email = user.Email ?? "",
-                UserName = user.UserName ?? "",
+                ApplicationUserId = appUser.UserId,
+                IdentityUserId = user.Id,
+                FirstName = appUser.FirstName,
+                Surname = appUser.Surname,
+                IdNumber = appUser.IdNumber,
+                Email = appUser.Email,
+                PhoneNumber = appUser.PhoneNumber,
                 Role = roles.FirstOrDefault() ?? "User"
             };
+
             return View(model);
         }
+
 
             [HttpPost]
         [AllowAnonymous]

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Project</title>
+    <title>@ViewData["Title"] - Bet Management System</title>
 
     <script type="importmap"></script>
 
@@ -11,17 +11,20 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Project.styles.css" asp-append-version="true" />
 </head>
-
-<body class="@(User.IsInRole("Admin") ? "admin-layout" : "user-layout")">
+<body>
+    @{
+        var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+        var isAdmin = User.IsInRole("Admin");
+    }
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light border-bottom box-shadow mb-3 @(User.IsInRole("Admin") ? "bg-dark navbar-dark" : "bg-white")">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3 @(isAdmin ? "navbar-dark bg-dark" : "navbar-light bg-white")">
             <div class="container-fluid">
 
-                <a class="navbar-brand @(User.IsInRole("Admin") ? "text-warning fw-bold" : "text-dark")"
+                <a class="navbar-brand @(isAdmin ? "text-warning fw-bold" : "text-dark")"
                        asp-area=""
-                       asp-controller="@(User.Identity != null && User.Identity.IsAuthenticated ? "Home" : "Account")"
-                       asp-action="@(User.Identity != null && User.Identity.IsAuthenticated ? "Index" : "Login")">
+                       asp-controller="Home"
+                       asp-action="Index">
                     Project
                 </a>
 
@@ -36,47 +39,23 @@
                 </button>
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1">
 
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        @if (isAuthenticated)
                         {
                             <li class="nav-item">
-                                <a class="nav-link @(User.IsInRole("Admin") ? "text-light" : "text-dark")"
+                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                       asp-area=""
                                        asp-controller="Home"
                                        asp-action="Index">
                                     Home
                                 </a>
                             </li>
 
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-light"
-                                           asp-controller="ApplicationUsers"
-                                           asp-action="Index">
-                                        Users
-                                    </a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link text-light"
-                                           asp-controller="Admin"
-                                           asp-action="Dashboard">
-                                        Dashboard
-                                    </a>
-                                </li>
-                            }
-
                             <li class="nav-item">
-                                <a class="nav-link @(User.IsInRole("Admin") ? "text-light" : "text-dark")"
-                                       asp-controller="Home"
-                                       asp-action="Contact">
-                                    Contact
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link @(User.IsInRole("Admin") ? "text-light" : "text-dark")"
+                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                       asp-area=""
                                        asp-controller="Home"
                                        asp-action="About">
                                     About
@@ -84,17 +63,67 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link @(User.IsInRole("Admin") ? "text-light" : "text-dark")"
+                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                       asp-area=""
+                                       asp-controller="Home"
+                                       asp-action="Contact">
+                                    Contact
+                                </a>
+                            </li>
+
+                            @if (isAdmin)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-warning fw-semibold"
+                                           asp-area=""
+                                           asp-controller="ApplicationUsers"
+                                           asp-action="Index">
+                                        Users
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-warning fw-semibold"
+                                           asp-area=""
+                                           asp-controller="Admin"
+                                           asp-action="Dashboard">
+                                        Admin Dashboard
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (isAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                       asp-area=""
                                        asp-controller="ApplicationUsers"
                                        asp-action="MyProfile">
                                     My Profile
                                 </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <form asp-area=""
+                                      asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-sm ms-2">
+                                        Logout
+                                    </button>
+                                </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark"
+                                       asp-area=""
                                        asp-controller="Account"
                                        asp-action="Login">
                                     Login
@@ -102,30 +131,15 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
+                                <a class="btn btn-primary btn-sm ms-2"
+                                       asp-area=""
                                        asp-controller="Account"
                                        asp-action="Register">
                                     Register
                                 </a>
                             </li>
                         }
-
                     </ul>
-
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
-                    {
-                        <form asp-controller="Account"
-                              asp-action="Logout"
-                              method="post"
-                              class="d-flex ms-auto">
-
-                            <button type="submit"
-                                    class="btn @(User.IsInRole("Admin") ? "btn-outline-warning" : "btn-outline-danger") btn-sm">
-                                Logout
-                            </button>
-
-                        </form>
-                    }
 
                 </div>
             </div>
@@ -133,40 +147,55 @@
     </header>
 
     <div class="container">
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                @TempData["SuccessMessage"]
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                        aria-label="Close">
-                </button>
-            </div>
-        }
-
         <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
 
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+
+        </main>
     </div>
 
-    @if (User.Identity != null && User.Identity.IsAuthenticated)
-    {
-        <footer class="border-top footer text-muted">
-            <div class="container">
-                &copy; 2026 - Project
-            </div>
-        </footer>
-    }
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Bet Management System
+
+            @if (isAuthenticated)
+            {
+                <span> - </span>
+                <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Privacy">
+                    Privacy
+                </a>
+            }
+        </div>
+    </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
 </html>

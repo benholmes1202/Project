@@ -1,0 +1,88 @@
+﻿@model Project.ViewModels.Account.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit My Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Edit My Profile</h2>
+                <small>Update your personal profile details</small>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="EditMyProfile" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <input type="hidden" asp-for="ApplicationUserId" />
+                    <input type="hidden" asp-for="IdentityUserId" />
+                    <input type="hidden" asp-for="IdNumber" />
+                    <input type="hidden" asp-for="Role" />
+
+                    <div class="mb-3">
+                        <label asp-for="IdNumber" class="form-label"></label>
+                        <input asp-for="IdNumber" class="form-control" readonly />
+                        <small class="text-muted">
+                            Your ID number cannot be changed after registration.
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Surname" class="form-label"></label>
+                        <input asp-for="Surname" class="form-control" />
+                        <span asp-validation-for="Surname" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label"></label>
+                        <input asp-for="Role" class="form-control" readonly />
+                        <small class="text-muted">
+                            Your role can only be changed by an administrator.
+                        </small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="MyProfile"
+                               class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

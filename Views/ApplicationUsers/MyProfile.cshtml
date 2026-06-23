@@ -1,0 +1,131 @@
+﻿@model Project.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">My Profile</h2>
+                <small>View your personal profile details</small>
+            </div>
+
+            <div class="card-body">
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["SuccessMessage"]
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close">
+                        </button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close">
+                        </button>
+                    </div>
+                }
+
+                <dl class="row mb-0">
+
+                    <dt class="col-sm-4">ID Number</dt>
+                    <dd class="col-sm-8">@Model.IdNumber</dd>
+
+                    <dt class="col-sm-4">First Name</dt>
+                    <dd class="col-sm-8">@Model.FirstName</dd>
+
+                    <dt class="col-sm-4">Surname</dt>
+                    <dd class="col-sm-8">@Model.Surname</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4">Phone Number</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                        {
+                            @Model.PhoneNumber
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not provided</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Account Status</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Created At</dt>
+                    <dd class="col-sm-8">
+                        @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    </dd>
+
+                    <dt class="col-sm-4">Updated At</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.UpdatedAt != null)
+                        {
+                            @Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not updated yet</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Linked Betting Accounts</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.BettingAccounts != null && Model.BettingAccounts.Any())
+                        {
+                            <span class="badge bg-info text-dark">
+                                @Model.BettingAccounts.Count account(s)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                No betting accounts linked yet
+                            </span>
+                        }
+                    </dd>
+
+                </dl>
+            </div>
+
+            <div class="card-footer d-flex justify-content-between">
+                <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                    Back to Home
+                </a>
+
+                <a asp-controller="ApplicationUsers"
+                       asp-action="EditMyProfile"
+                       class="btn btn-primary">
+                    Edit My Profile
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
