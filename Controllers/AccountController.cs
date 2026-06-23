@@ -169,9 +169,8 @@ namespace Project.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-
             TempData["SuccessMessage"] = "You have been signed out.";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(Login), "Account");
         }
 
         [AllowAnonymous]

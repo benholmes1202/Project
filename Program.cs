@@ -56,8 +56,8 @@ namespace Project
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                pattern: "{controller=Account}/{action=Login}/{id?}")
+            .WithStaticAssets();
 
             app.Run();
         }
