@@ -81,6 +81,7 @@ namespace Project.Controllers
                 Surname = model.Surname.Trim(),
                 Email = cleanEmail,
                 PhoneNumber = model.PhoneNumber?.Trim(),
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
