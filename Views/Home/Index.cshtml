@@ -1,8 +1,31 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="py-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <h1 class="display-5 fw-semibold">Bet Management System</h1>
+            <p class="lead">
+                A secure MVC application for managing customers, betting accounts, and account transactions.
+            </p>
+            <p>
+                Administrators can create users, link unlimited betting accounts, capture debit and credit
+                transactions, and keep outstanding balances accurate through controlled workflows.
+            </p>
+            <a class="btn btn-primary" asp-controller="ApplicationUsers" asp-action="Index">Manage Users</a>
+            <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="About">Learn More</a>
+        </div>
+        <div class="col-lg-5">
+            <div class="border rounded p-4 bg-light">
+                <h2 class="h5">Core Workflows</h2>
+                <ul class="mb-0">
+                    <li>Search users by ID number, surname, or account number.</li>
+                    <li>Add accounts only after a user profile exists.</li>
+                    <li>Capture transactions with date and balance validation.</li>
+                    <li>Close accounts only when the outstanding balance is zero.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,77 +1,59 @@
-﻿@model Project.Models.AccountTransaction
+@model Project.ViewModels.AccountTransactions.AccountTransactionFormViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Transaction";
 }
 
-<h1>Edit</h1>
+<h1 class="h2">Edit Transaction</h1>
 
-<h4>AccountTransaction</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="TransactionId" />
-            <div class="form-group">
-                <label asp-for="AccountId" class="control-label"></label>
-                <input asp-for="AccountId" class="form-control" />
-                <span asp-validation-for="AccountId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TransactionTypeId" class="control-label"></label>
-                <select asp-for="TransactionTypeId" class="form-control" asp-items="ViewBag.TransactionTypeId"></select>
+            <input type="hidden" asp-for="AccountId" />
+            <dl class="row">
+                <dt class="col-sm-4">Account</dt>
+                <dd class="col-sm-8">@Model.AccountId</dd>
+                <dt class="col-sm-4">Last Captured</dt>
+                <dd class="col-sm-8">@(Model.CaptureDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</dd>
+            </dl>
+            <div class="mb-3">
+                <label asp-for="TransactionTypeId" class="form-label"></label>
+                <select asp-for="TransactionTypeId" class="form-select" asp-items="ViewBag.TransactionTypeId"></select>
                 <span asp-validation-for="TransactionTypeId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="RelatedBetId" class="control-label"></label>
-                <select asp-for="RelatedBetId" class="form-control" asp-items="ViewBag.RelatedBetId"></select>
-                <span asp-validation-for="RelatedBetId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Amount" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label"></label>
                 <input asp-for="Amount" class="form-control" />
                 <span asp-validation-for="Amount" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TransactionDate" class="control-label"></label>
-                <input asp-for="TransactionDate" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="TransactionDate" class="form-label"></label>
+                <input asp-for="TransactionDate" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
                 <span asp-validation-for="TransactionDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CaptureDate" class="control-label"></label>
-                <input asp-for="CaptureDate" class="form-control" />
-                <span asp-validation-for="CaptureDate" class="text-danger"></span>
+            <div class="mb-3">
+                <label asp-for="RelatedBetId" class="form-label"></label>
+                <select asp-for="RelatedBetId" class="form-select" asp-items="ViewBag.RelatedBetId">
+                    <option value="">No related bet</option>
+                </select>
+                <span asp-validation-for="RelatedBetId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Reference" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="Reference" class="form-label"></label>
                 <input asp-for="Reference" class="form-control" />
                 <span asp-validation-for="Reference" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Notes" class="control-label"></label>
-                <input asp-for="Notes" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="Notes" class="form-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Notes" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" asp-controller="BettingAccounts" asp-action="Details" asp-route-id="@Model.AccountId">Cancel</a>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

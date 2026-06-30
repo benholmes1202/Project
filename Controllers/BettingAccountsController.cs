@@ -1,32 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Project.Models;
 using Project.Services;
+using Project.ViewModels.BettingAccounts;
 
 namespace Project.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class BettingAccountsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IBettingAccountService _service;
 
-        public BettingAccountsController(ApplicationDbContext context)
+        public BettingAccountsController(ApplicationDbContext context, IBettingAccountService service)
         {
             _context = context;
+            _service = service;
         }
 
-        // GET: BettingAccounts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.BettingAccounts.Include(b => b.User);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _service.GetAllAsync());
         }
 
-        // GET: BettingAccounts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,9 +32,7 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var bettingAccount = await _context.BettingAccounts
-                .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.AccountId == id);
+            var bettingAccount = await _service.GetDetailsAsync(id.Value);
             if (bettingAccount == null)
             {
                 return NotFound();
@@ -45,31 +41,40 @@ namespace Project.Controllers
             return View(bettingAccount);
         }
 
-        // GET: BettingAccounts/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? userId)
         {
-            ViewData["UserId"] = new SelectList(_context.AppUsers, "UserId", "Email");
-            return View();
+            var model = new BettingAccountFormViewModel
+            {
+                UserId = userId ?? 0,
+                CurrencyCode = "ZAR"
+            };
+
+            await PopulateUsersAsync(model.UserId);
+            return View(model);
         }
 
-        // POST: BettingAccounts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AccountId,UserId,AccountNumber,CurrencyCode,Balance,Status,CreatedAt,UpdatedAt,ClosedAt,RowVersion")] BettingAccount bettingAccount)
+        public async Task<IActionResult> Create(BettingAccountFormViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(bettingAccount);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await PopulateUsersAsync(model.UserId);
+                return View(model);
             }
-            ViewData["UserId"] = new SelectList(_context.AppUsers, "UserId", "Email", bettingAccount.UserId);
-            return View(bettingAccount);
+
+            var result = await _service.CreateAsync(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Account could not be created.");
+                await PopulateUsersAsync(model.UserId);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Betting account created successfully.";
+            return RedirectToAction(nameof(Details), new { id = result.Value });
         }
 
-        // GET: BettingAccounts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,52 +82,75 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var bettingAccount = await _context.BettingAccounts.FindAsync(id);
-            if (bettingAccount == null)
+            var account = await _service.GetForEditAsync(id.Value);
+            if (account == null)
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.AppUsers, "UserId", "Email", bettingAccount.UserId);
-            return View(bettingAccount);
+
+            var model = new BettingAccountFormViewModel
+            {
+                AccountId = account.AccountId,
+                UserId = account.UserId,
+                AccountNumber = account.AccountNumber,
+                CurrencyCode = account.CurrencyCode,
+                Balance = account.Balance,
+                Status = account.Status
+            };
+
+            await PopulateUsersAsync(model.UserId);
+            return View(model);
         }
 
-        // POST: BettingAccounts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AccountId,UserId,AccountNumber,CurrencyCode,Balance,Status,CreatedAt,UpdatedAt,ClosedAt,RowVersion")] BettingAccount bettingAccount)
+        public async Task<IActionResult> Edit(int id, BettingAccountFormViewModel model)
         {
-            if (id != bettingAccount.AccountId)
+            if (id != model.AccountId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(bettingAccount);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BettingAccountExists(bettingAccount.AccountId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await PopulateUsersAsync(model.UserId);
+                return View(model);
             }
-            ViewData["UserId"] = new SelectList(_context.AppUsers, "UserId", "Email", bettingAccount.UserId);
-            return View(bettingAccount);
+
+            var result = await _service.UpdateAsync(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Account could not be updated.");
+                await PopulateUsersAsync(model.UserId);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Betting account updated successfully.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
-        // GET: BettingAccounts/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Close(int id)
+        {
+            var result = await _service.CloseAsync(id);
+            TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] =
+                result.Succeeded ? "Account closed successfully." : result.ErrorMessage;
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reopen(int id)
+        {
+            var result = await _service.ReopenAsync(id);
+            TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] =
+                result.Succeeded ? "Account reopened successfully." : result.ErrorMessage;
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -131,8 +159,12 @@ namespace Project.Controllers
             }
 
             var bettingAccount = await _context.BettingAccounts
+                .AsNoTracking()
                 .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.AccountId == id);
+                .Include(b => b.AccountTransactions)
+                .Include(b => b.Bets)
+                .FirstOrDefaultAsync(m => m.AccountId == id.Value);
+
             if (bettingAccount == null)
             {
                 return NotFound();
@@ -141,24 +173,35 @@ namespace Project.Controllers
             return View(bettingAccount);
         }
 
-        // POST: BettingAccounts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var bettingAccount = await _context.BettingAccounts.FindAsync(id);
-            if (bettingAccount != null)
+            var result = await _service.DeleteAsync(id);
+            if (!result.Succeeded)
             {
-                _context.BettingAccounts.Remove(bettingAccount);
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return RedirectToAction(nameof(Details), new { id });
             }
 
-            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Betting account deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BettingAccountExists(int id)
+        private async Task PopulateUsersAsync(int selectedUserId)
         {
-            return _context.BettingAccounts.Any(e => e.AccountId == id);
+            var users = await _context.AppUsers
+                .AsNoTracking()
+                .OrderBy(u => u.Surname)
+                .ThenBy(u => u.FirstName)
+                .Select(u => new
+                {
+                    u.UserId,
+                    Name = u.FirstName + " " + u.Surname + " (" + u.IdNumber + ")"
+                })
+                .ToListAsync();
+
+            ViewData["UserId"] = new SelectList(users, "UserId", "Name", selectedUserId);
         }
     }
 }

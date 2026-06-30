@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Project.Models;
 using Project.Services;
 using Project.ViewModels.Account;
+using Project.ViewModels.ApplicationUsers;
 
 namespace Project.Controllers
 {
     [Authorize]
     public class ApplicationUsersController : Controller
     {
+        private const int PageSize = 10;
         private readonly ApplicationDbContext _context;
         private readonly IApplicationUserService _service;
         private readonly UserManager<IdentityUser> _userManager;
@@ -25,20 +27,23 @@ namespace Project.Controllers
             _userManager = userManager;
         }
 
-        // GET: ApplicationUsers
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, int page = 1)
         {
-            var users = await _context.AppUsers
-                .AsNoTracking()
-                .OrderBy(u => u.Surname)
-                .ThenBy(u => u.FirstName)
-                .ToListAsync();
+            var result = await _service.GetUsersAsync(searchTerm, page, PageSize);
 
-            return View(users);
+            var model = new ApplicationUsersIndexViewModel
+            {
+                Users = result.Items,
+                SearchTerm = searchTerm,
+                PageNumber = result.PageNumber,
+                TotalPages = result.TotalPages,
+                TotalUsers = result.TotalItems
+            };
+
+            return View(model);
         }
 
-        // GET: ApplicationUsers/Details/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
@@ -47,10 +52,7 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var applicationUser = await _context.AppUsers
-                .AsNoTracking()
-                .Include(u => u.BettingAccounts)
-                .FirstOrDefaultAsync(m => m.UserId == id);
+            var applicationUser = await _service.GetByIdAsync(id.Value);
 
             if (applicationUser == null)
             {
@@ -60,14 +62,12 @@ namespace Project.Controllers
             return View(applicationUser);
         }
 
-        // GET: ApplicationUsers/Create
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            return View();
+            return View(new ApplicationUser { IsActive = true });
         }
 
-        // POST: ApplicationUsers/Create
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -76,20 +76,6 @@ namespace Project.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(applicationUser);
-            }
-
-            applicationUser.IdNumber = applicationUser.IdNumber.Trim();
-            applicationUser.FirstName = applicationUser.FirstName.Trim();
-            applicationUser.Surname = applicationUser.Surname.Trim();
-            applicationUser.Email = applicationUser.Email.Trim();
-            applicationUser.PhoneNumber = applicationUser.PhoneNumber?.Trim();
-
-            bool idExists = await _service.IdNumberExistsAsync(applicationUser.IdNumber);
-
-            if (idExists)
-            {
-                ModelState.AddModelError(nameof(applicationUser.IdNumber), "A user with this ID Number already exists.");
                 return View(applicationUser);
             }
 
@@ -105,7 +91,6 @@ namespace Project.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ApplicationUsers/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -114,7 +99,9 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var applicationUser = await _context.AppUsers.FindAsync(id);
+            var applicationUser = await _context.AppUsers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == id.Value);
 
             if (applicationUser == null)
             {
@@ -124,7 +111,6 @@ namespace Project.Controllers
             return View(applicationUser);
         }
 
-        // POST: ApplicationUsers/Edit/5
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -142,48 +128,18 @@ namespace Project.Controllers
                 return View(applicationUser);
             }
 
-            var existingUser = await _context.AppUsers.FindAsync(id);
+            bool updated = await _service.UpdateAsync(applicationUser);
 
-            if (existingUser == null)
-            {
-                return NotFound();
-            }
-
-            bool duplicateIdNumberExists = await _context.AppUsers
-                .AnyAsync(u => u.UserId != id && u.IdNumber == applicationUser.IdNumber.Trim());
-
-            if (duplicateIdNumberExists)
+            if (!updated)
             {
                 ModelState.AddModelError(nameof(applicationUser.IdNumber), "A user with this ID Number already exists.");
                 return View(applicationUser);
             }
 
-            existingUser.IdNumber = applicationUser.IdNumber.Trim();
-            existingUser.FirstName = applicationUser.FirstName.Trim();
-            existingUser.Surname = applicationUser.Surname.Trim();
-            existingUser.Email = applicationUser.Email.Trim();
-            existingUser.PhoneNumber = applicationUser.PhoneNumber?.Trim();
-            existingUser.IsActive = applicationUser.IsActive;
-            existingUser.UpdatedAt = DateTime.UtcNow;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "User updated successfully.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ApplicationUserExists(applicationUser.UserId))
-                {
-                    return NotFound();
-                }
-
-                throw;
-            }
+            TempData["SuccessMessage"] = "User updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: ApplicationUsers/Delete/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -195,53 +151,34 @@ namespace Project.Controllers
             var applicationUser = await _context.AppUsers
                 .AsNoTracking()
                 .Include(u => u.BettingAccounts)
-                .FirstOrDefaultAsync(m => m.UserId == id);
+                .FirstOrDefaultAsync(m => m.UserId == id.Value);
 
             if (applicationUser == null)
             {
                 return NotFound();
             }
 
+            ViewBag.CanDelete = await _service.CanDeleteAsync(applicationUser.UserId);
             return View(applicationUser);
         }
 
-        // POST: ApplicationUsers/Delete/5
         [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var applicationUser = await _context.AppUsers
-                .Include(u => u.BettingAccounts)
-                .FirstOrDefaultAsync(u => u.UserId == id);
-
-            if (applicationUser == null)
-            {
-                return NotFound();
-            }
-
             string? currentIdentityUserId = _userManager.GetUserId(User);
+            var result = await _service.DeleteAsync(id, currentIdentityUserId);
 
-            if (!string.IsNullOrWhiteSpace(currentIdentityUserId) &&
-                applicationUser.IdentityUserId == currentIdentityUserId)
+            if (!result.Succeeded)
             {
-                TempData["ErrorMessage"] = "You cannot delete your own user profile while signed in.";
+                TempData["ErrorMessage"] = result.ErrorMessage;
                 return RedirectToAction(nameof(Index));
             }
-
-            if (applicationUser.BettingAccounts != null && applicationUser.BettingAccounts.Any())
-            {
-                TempData["ErrorMessage"] = "This user cannot be deleted because they have linked betting accounts.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            _context.AppUsers.Remove(applicationUser);
-            await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "User deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
-
 
         [Authorize]
         public async Task<IActionResult> MyProfile()
@@ -343,7 +280,6 @@ namespace Project.Controllers
                 return RedirectToAction(nameof(MyProfile));
             }
 
-            
             ModelState.Remove(nameof(ProfileViewModel.ApplicationUserId));
             ModelState.Remove(nameof(ProfileViewModel.IdentityUserId));
             ModelState.Remove(nameof(ProfileViewModel.IdNumber));
@@ -351,31 +287,17 @@ namespace Project.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.ApplicationUserId = applicationUser.UserId;
-                model.IdentityUserId = identityUserId;
-                model.IdNumber = applicationUser.IdNumber;
-
-                var roles = await _userManager.GetRolesAsync(identityUser);
-                model.Role = roles.FirstOrDefault() ?? "User";
-
+                await PopulateProfileReadOnlyFields(model, applicationUser, identityUser);
                 return View(model);
             }
 
             string cleanEmail = model.Email.Trim();
-
             var existingIdentityUserWithEmail = await _userManager.FindByEmailAsync(cleanEmail);
 
             if (existingIdentityUserWithEmail != null && existingIdentityUserWithEmail.Id != identityUserId)
             {
                 ModelState.AddModelError(nameof(model.Email), "This email address is already used by another account.");
-
-                model.ApplicationUserId = applicationUser.UserId;
-                model.IdentityUserId = identityUserId;
-                model.IdNumber = applicationUser.IdNumber;
-
-                var roles = await _userManager.GetRolesAsync(identityUser);
-                model.Role = roles.FirstOrDefault() ?? "User";
-
+                await PopulateProfileReadOnlyFields(model, applicationUser, identityUser);
                 return View(model);
             }
 
@@ -397,13 +319,7 @@ namespace Project.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
 
-                model.ApplicationUserId = applicationUser.UserId;
-                model.IdentityUserId = identityUserId;
-                model.IdNumber = applicationUser.IdNumber;
-
-                var roles = await _userManager.GetRolesAsync(identityUser);
-                model.Role = roles.FirstOrDefault() ?? "User";
-
+                await PopulateProfileReadOnlyFields(model, applicationUser, identityUser);
                 return View(model);
             }
 
@@ -413,9 +329,17 @@ namespace Project.Controllers
             return RedirectToAction(nameof(MyProfile));
         }
 
-        private bool ApplicationUserExists(int id)
+        private async Task PopulateProfileReadOnlyFields(
+            ProfileViewModel model,
+            ApplicationUser applicationUser,
+            IdentityUser identityUser)
         {
-            return _context.AppUsers.Any(e => e.UserId == id);
+            model.ApplicationUserId = applicationUser.UserId;
+            model.IdentityUserId = applicationUser.IdentityUserId ?? string.Empty;
+            model.IdNumber = applicationUser.IdNumber;
+
+            var roles = await _userManager.GetRolesAsync(identityUser);
+            model.Role = roles.FirstOrDefault() ?? "User";
         }
     }
 }

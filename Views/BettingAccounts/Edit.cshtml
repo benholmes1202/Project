@@ -1,67 +1,41 @@
-﻿@model Project.Models.BettingAccount
+@model Project.ViewModels.BettingAccounts.BettingAccountFormViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Account";
 }
 
-<h1>Edit</h1>
+<h1 class="h2">Edit Betting Account</h1>
 
-<h4>BettingAccount</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="AccountId" />
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
+            <div class="mb-3">
+                <label asp-for="UserId" class="form-label"></label>
+                <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId"></select>
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="AccountNumber" class="control-label"></label>
+            <div class="mb-3">
+                <label asp-for="AccountNumber" class="form-label"></label>
                 <input asp-for="AccountNumber" class="form-control" />
                 <span asp-validation-for="AccountNumber" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CurrencyCode" class="control-label"></label>
-                <input asp-for="CurrencyCode" class="form-control" />
+            <div class="mb-3">
+                <label asp-for="CurrencyCode" class="form-label"></label>
+                <input asp-for="CurrencyCode" class="form-control" maxlength="3" />
                 <span asp-validation-for="CurrencyCode" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Balance" class="control-label"></label>
-                <input asp-for="Balance" class="form-control" />
-                <span asp-validation-for="Balance" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ClosedAt" class="control-label"></label>
-                <input asp-for="ClosedAt" class="form-control" />
-                <span asp-validation-for="ClosedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+            <dl class="row">
+                <dt class="col-sm-5">Outstanding Balance</dt>
+                <dd class="col-sm-7">@Model.Balance.ToString("C")</dd>
+                <dt class="col-sm-5">Status</dt>
+                <dd class="col-sm-7">@Model.Status</dd>
+            </dl>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.AccountId">Cancel</a>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

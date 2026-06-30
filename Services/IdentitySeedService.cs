@@ -21,6 +21,23 @@ namespace Project.Services
                 }
             }
 
+            var transactionTypes = new[]
+            {
+                new TransactionType { Name = "Credit", Direction = "Credit", BalanceEffect = 1, IsActive = true },
+                new TransactionType { Name = "Debit", Direction = "Debit", BalanceEffect = -1, IsActive = true }
+            };
+
+            foreach (var transactionType in transactionTypes)
+            {
+                var exists = context.TransactionTypes.Any(t => t.Name == transactionType.Name);
+                if (!exists)
+                {
+                    context.TransactionTypes.Add(transactionType);
+                }
+            }
+
+            await context.SaveChangesAsync();
+
             string adminEmail = "admin@betmanager.local";
             string adminPassword = "Admin12345!";
 

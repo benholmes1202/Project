@@ -10,6 +10,10 @@ namespace Project
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -31,11 +35,15 @@ namespace Project
             .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+            builder.Services.AddScoped<IBettingAccountService, BettingAccountService>();
+            builder.Services.AddScoped<IAccountTransactionService, AccountTransactionService>();
 
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
             {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                await context.Database.MigrateAsync();
                 await IdentitySeedService.SeedAsync(scope.ServiceProvider);
             }
 
@@ -56,7 +64,7 @@ namespace Project
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Account}/{action=Login}/{id?}")
+                pattern: "{controller=Home}/{action=Index}/{id?}")
             .WithStaticAssets();
 
             app.Run();

@@ -25,7 +25,7 @@
                        asp-area=""
                        asp-controller="Home"
                        asp-action="Index">
-                    Project
+                    Bet Management
                 </a>
 
                 <button class="navbar-toggler"
@@ -41,56 +41,52 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
                     <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="Index">
+                                Home
+                            </a>
+                        </li>
 
-                        @if (isAuthenticated)
+                        <li class="nav-item">
+                            <a class="nav-link @(isAdmin ? "text-warning fw-semibold" : "text-dark")"
+                                   asp-area=""
+                                   asp-controller="ApplicationUsers"
+                                   asp-action="Index">
+                                Users
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="About">
+                                About
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="Contact">
+                                Contact
+                            </a>
+                        </li>
+
+                        @if (isAdmin)
                         {
                             <li class="nav-item">
-                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
+                                <a class="nav-link text-warning fw-semibold"
                                        asp-area=""
-                                       asp-controller="Home"
-                                       asp-action="Index">
-                                    Home
+                                       asp-controller="Admin"
+                                       asp-action="Dashboard">
+                                    Admin Dashboard
                                 </a>
                             </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
-                                       asp-area=""
-                                       asp-controller="Home"
-                                       asp-action="About">
-                                    About
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link @(isAdmin ? "text-light" : "text-dark")"
-                                       asp-area=""
-                                       asp-controller="Home"
-                                       asp-action="Contact">
-                                    Contact
-                                </a>
-                            </li>
-
-                            @if (isAdmin)
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-warning fw-semibold"
-                                           asp-area=""
-                                           asp-controller="ApplicationUsers"
-                                           asp-action="Index">
-                                        Users
-                                    </a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a class="nav-link text-warning fw-semibold"
-                                           asp-area=""
-                                           asp-controller="Admin"
-                                           asp-action="Dashboard">
-                                        Admin Dashboard
-                                    </a>
-                                </li>
-                            }
                         }
                     </ul>
 

@@ -1,75 +1,39 @@
-﻿@model Project.Models.BettingAccount
+@model Project.Models.BettingAccount
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Account";
+    var hasHistory = Model.AccountTransactions.Any() || Model.Bets.Any();
 }
 
-<h1>Delete</h1>
+<h1 class="h2">Delete Account</h1>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>BettingAccount</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AccountNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AccountNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CurrencyCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CurrencyCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Balance)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Balance)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ClosedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ClosedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RowVersion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RowVersion)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="AccountId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="alert @(hasHistory ? "alert-danger" : "alert-warning")">
+    @if (hasHistory)
+    {
+        <span>Accounts with transactions or bets cannot be deleted. Close the account instead.</span>
+    }
+    else
+    {
+        <span>Are you sure you want to delete this empty betting account?</span>
+    }
 </div>
+
+<dl class="row">
+    <dt class="col-sm-3">Account Number</dt>
+    <dd class="col-sm-9">@Model.AccountNumber</dd>
+    <dt class="col-sm-3">Owner</dt>
+    <dd class="col-sm-9">@(Model.User == null ? "-" : $"{Model.User.FirstName} {Model.User.Surname}")</dd>
+    <dt class="col-sm-3">Balance</dt>
+    <dd class="col-sm-9">@Model.Balance.ToString("C")</dd>
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="AccountId" />
+    @if (!hasHistory)
+    {
+        <button type="submit" class="btn btn-danger">Delete</button>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.AccountId">Back to Account</a>
+</form>

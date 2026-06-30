@@ -1,32 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Project.Models;
 using Project.Services;
+using Project.ViewModels.AccountTransactions;
 
 namespace Project.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AccountTransactionsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAccountTransactionService _service;
 
-        public AccountTransactionsController(ApplicationDbContext context)
+        public AccountTransactionsController(ApplicationDbContext context, IAccountTransactionService service)
         {
             _context = context;
+            _service = service;
         }
 
-        // GET: AccountTransactions
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.AccountTransactions.Include(a => a.RelatedBet).Include(a => a.TransactionType);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _service.GetAllAsync());
         }
 
-        // GET: AccountTransactions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,10 +31,7 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var accountTransaction = await _context.AccountTransactions
-                .Include(a => a.RelatedBet)
-                .Include(a => a.TransactionType)
-                .FirstOrDefaultAsync(m => m.TransactionId == id);
+            var accountTransaction = await _service.GetDetailsAsync(id.Value);
             if (accountTransaction == null)
             {
                 return NotFound();
@@ -46,33 +40,40 @@ namespace Project.Controllers
             return View(accountTransaction);
         }
 
-        // GET: AccountTransactions/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? accountId)
         {
-            ViewData["RelatedBetId"] = new SelectList(_context.Bets, "BetId", "BetId");
-            ViewData["TransactionTypeId"] = new SelectList(_context.TransactionTypes, "TransactionTypeId", "Direction");
-            return View();
+            var model = new AccountTransactionFormViewModel
+            {
+                AccountId = accountId ?? 0,
+                TransactionDate = DateTime.Today
+            };
+
+            await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+            return View(model);
         }
 
-        // POST: AccountTransactions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TransactionId,AccountId,TransactionTypeId,RelatedBetId,Amount,TransactionDate,CaptureDate,Reference,Notes,CreatedAt,UpdatedAt")] AccountTransaction accountTransaction)
+        public async Task<IActionResult> Create(AccountTransactionFormViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(accountTransaction);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+                return View(model);
             }
-            ViewData["RelatedBetId"] = new SelectList(_context.Bets, "BetId", "BetId", accountTransaction.RelatedBetId);
-            ViewData["TransactionTypeId"] = new SelectList(_context.TransactionTypes, "TransactionTypeId", "Direction", accountTransaction.TransactionTypeId);
-            return View(accountTransaction);
+
+            var result = await _service.CreateAsync(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Transaction could not be created.");
+                await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Transaction created and account balance updated.";
+            return RedirectToAction("Details", "BettingAccounts", new { id = model.AccountId });
         }
 
-        // GET: AccountTransactions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -80,54 +81,56 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var accountTransaction = await _context.AccountTransactions.FindAsync(id);
+            var accountTransaction = await _service.GetForEditAsync(id.Value);
             if (accountTransaction == null)
             {
                 return NotFound();
             }
-            ViewData["RelatedBetId"] = new SelectList(_context.Bets, "BetId", "BetId", accountTransaction.RelatedBetId);
-            ViewData["TransactionTypeId"] = new SelectList(_context.TransactionTypes, "TransactionTypeId", "Direction", accountTransaction.TransactionTypeId);
-            return View(accountTransaction);
+
+            var model = new AccountTransactionFormViewModel
+            {
+                TransactionId = accountTransaction.TransactionId,
+                AccountId = accountTransaction.AccountId,
+                TransactionTypeId = accountTransaction.TransactionTypeId,
+                RelatedBetId = accountTransaction.RelatedBetId,
+                Amount = accountTransaction.Amount,
+                TransactionDate = accountTransaction.TransactionDate,
+                Reference = accountTransaction.Reference,
+                Notes = accountTransaction.Notes,
+                CaptureDate = accountTransaction.CaptureDate
+            };
+
+            await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+            return View(model);
         }
 
-        // POST: AccountTransactions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("TransactionId,AccountId,TransactionTypeId,RelatedBetId,Amount,TransactionDate,CaptureDate,Reference,Notes,CreatedAt,UpdatedAt")] AccountTransaction accountTransaction)
+        public async Task<IActionResult> Edit(int id, AccountTransactionFormViewModel model)
         {
-            if (id != accountTransaction.TransactionId)
+            if (id != model.TransactionId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(accountTransaction);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AccountTransactionExists(accountTransaction.TransactionId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+                return View(model);
             }
-            ViewData["RelatedBetId"] = new SelectList(_context.Bets, "BetId", "BetId", accountTransaction.RelatedBetId);
-            ViewData["TransactionTypeId"] = new SelectList(_context.TransactionTypes, "TransactionTypeId", "Direction", accountTransaction.TransactionTypeId);
-            return View(accountTransaction);
+
+            var result = await _service.UpdateAsync(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Transaction could not be updated.");
+                await PopulateSelectListsAsync(model.AccountId, model.TransactionTypeId, model.RelatedBetId);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Transaction updated and account balance recalculated.";
+            return RedirectToAction("Details", "BettingAccounts", new { id = model.AccountId });
         }
 
-        // GET: AccountTransactions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -135,10 +138,7 @@ namespace Project.Controllers
                 return NotFound();
             }
 
-            var accountTransaction = await _context.AccountTransactions
-                .Include(a => a.RelatedBet)
-                .Include(a => a.TransactionType)
-                .FirstOrDefaultAsync(m => m.TransactionId == id);
+            var accountTransaction = await _service.GetDetailsAsync(id.Value);
             if (accountTransaction == null)
             {
                 return NotFound();
@@ -147,24 +147,52 @@ namespace Project.Controllers
             return View(accountTransaction);
         }
 
-        // POST: AccountTransactions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var accountTransaction = await _context.AccountTransactions.FindAsync(id);
-            if (accountTransaction != null)
+            var accountTransaction = await _service.GetDetailsAsync(id);
+            var accountId = accountTransaction?.AccountId;
+
+            var result = await _service.DeleteAsync(id);
+            if (!result.Succeeded)
             {
-                _context.AccountTransactions.Remove(accountTransaction);
+                TempData["ErrorMessage"] = result.ErrorMessage;
+                return accountId.HasValue
+                    ? RedirectToAction("Details", "BettingAccounts", new { id = accountId.Value })
+                    : RedirectToAction(nameof(Index));
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "Transaction deleted and account balance recalculated.";
+            return accountId.HasValue
+                ? RedirectToAction("Details", "BettingAccounts", new { id = accountId.Value })
+                : RedirectToAction(nameof(Index));
         }
 
-        private bool AccountTransactionExists(int id)
+        private async Task PopulateSelectListsAsync(int selectedAccountId, int selectedTransactionTypeId, int? selectedBetId)
         {
-            return _context.AccountTransactions.Any(e => e.TransactionId == id);
+            var accounts = await _context.BettingAccounts
+                .AsNoTracking()
+                .Where(a => a.Status == "Open")
+                .OrderBy(a => a.AccountNumber)
+                .Select(a => new { a.AccountId, a.AccountNumber })
+                .ToListAsync();
+
+            var transactionTypes = await _context.TransactionTypes
+                .AsNoTracking()
+                .Where(t => t.IsActive)
+                .OrderBy(t => t.Name)
+                .ToListAsync();
+
+            var bets = await _context.Bets
+                .AsNoTracking()
+                .OrderBy(b => b.BetId)
+                .Select(b => new { b.BetId, Display = b.BetId + " - " + b.Category })
+                .ToListAsync();
+
+            ViewData["AccountId"] = new SelectList(accounts, "AccountId", "AccountNumber", selectedAccountId);
+            ViewData["TransactionTypeId"] = new SelectList(transactionTypes, "TransactionTypeId", "Name", selectedTransactionTypeId);
+            ViewData["RelatedBetId"] = new SelectList(bets, "BetId", "Display", selectedBetId);
         }
     }
 }

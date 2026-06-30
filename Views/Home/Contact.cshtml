@@ -1,12 +1,48 @@
-﻿@{
+@model Project.ViewModels.Home.ContactViewModel
+
+@{
     ViewData["Title"] = "Contact";
 }
 
-<h1>Contact</h1>
+<h1 class="h2">Contact</h1>
 
-<p>You can contact us using the details below:</p>
+<div class="row g-4">
+    <div class="col-lg-5">
+        <p>You can reach the fictional support team through the form or direct contact links below.</p>
+        <ul>
+            <li>Email: <a href="mailto:support@betmanager.local">support@betmanager.local</a></li>
+            <li>Phone: <a href="tel:+27210000000">+27 21 000 0000</a></li>
+            <li>LinkedIn: <a href="https://www.linkedin.com" target="_blank" rel="noopener">Company Profile</a></li>
+        </ul>
+    </div>
+    <div class="col-lg-7">
+        <form asp-action="Contact" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Subject" class="form-label"></label>
+                <input asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Message" class="form-label"></label>
+                <textarea asp-for="Message" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+    </div>
+</div>
 
-<ul>
-    <li>Email: <a href="mailto:support@betmanager.local">support@betmanager.local</a></li>
-    <li>Phone: <a href="tel:+27210000000">+27 21 000 0000</a></li>
-</ul>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

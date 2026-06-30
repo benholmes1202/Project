@@ -197,6 +197,9 @@ namespace Project.Services
                 entity.Property(s => s.PayoutAmount)
                     .HasColumnType("decimal(18,2)");
 
+                entity.Property(s => s.ProfitLoss)
+                    .HasColumnType("decimal(18,2)");
+
                 entity.Property(s => s.SettledAt)
                     .HasDefaultValueSql("GETDATE()");
 
