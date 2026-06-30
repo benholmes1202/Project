@@ -1,22 +1,58 @@
-﻿@{
+@{
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<h2 class="mb-4">Admin Dashboard</h2>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h2 mb-1">Admin Dashboard</h1>
+        <p class="text-muted mb-0">Manage users, betting accounts, matches, transactions, and placed bets.</p>
+    </div>
+</div>
 
-<div class="card p-4">
-    <h4>Welcome, Admin</h4>
-    <p class="mb-3">
-        From here you will manage users, betting accounts, and transactions.
-    </p>
-
-    <div class="d-flex gap-2 flex-wrap">
-        Index
-            Manage Users
-        </a>
-
-        Profile
-            View My Profile
-        </a>
+<div class="row g-3">
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Users</h2>
+                <p class="text-muted">Create users, search profiles, and view linked accounts.</p>
+                <a class="btn btn-primary" asp-controller="ApplicationUsers" asp-action="Index">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Betting Accounts</h2>
+                <p class="text-muted">Review balances and close accounts only when they are at zero.</p>
+                <a class="btn btn-primary" asp-controller="BettingAccounts" asp-action="Index">Manage Accounts</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Matches</h2>
+                <p class="text-muted">Create match offerings and odds for users to bet on.</p>
+                <a class="btn btn-primary" asp-controller="BetMatches" asp-action="Index">Manage Matches</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Placed Bets</h2>
+                <p class="text-muted">Review all bets placed by users.</p>
+                <a class="btn btn-outline-primary" asp-controller="Bets" asp-action="Index">View Bets</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Transactions</h2>
+                <p class="text-muted">Audit deposits, withdrawals, and bet stake debits.</p>
+                <a class="btn btn-outline-primary" asp-controller="AccountTransactions" asp-action="Index">View Transactions</a>
+            </div>
+        </div>
     </div>
 </div>

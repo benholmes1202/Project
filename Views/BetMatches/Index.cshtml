@@ -1,0 +1,52 @@
+@model IEnumerable<Project.Models.BetMatch>
+
+@{
+    ViewData["Title"] = "Matches";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h2 mb-1">Matches</h1>
+        <p class="text-muted mb-0">Admin-created matches available for betting.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Create Match</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No matches have been created yet.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Sport</th>
+                    <th>Date</th>
+                    <th>Odds</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var match in Model)
+                {
+                    <tr>
+                        <td>@match.HomeTeam vs @match.AwayTeam</td>
+                        <td>@match.Sport</td>
+                        <td>@match.MatchDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>H @match.HomeOdds / A @match.AwayOdds@(match.DrawOdds.HasValue ? $" / D {match.DrawOdds.Value}" : "")</td>
+                        <td><span class="badge @(match.IsActive ? "bg-success" : "bg-secondary")">@(match.IsActive ? "Active" : "Inactive")</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@match.BetMatchId">Details</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@match.BetMatchId">Edit</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@match.BetMatchId">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

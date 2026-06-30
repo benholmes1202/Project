@@ -1,0 +1,23 @@
+@model Project.Models.BetMatch
+
+@{
+    ViewData["Title"] = "Match Details";
+}
+
+<h1 class="h2">@Model.HomeTeam vs @Model.AwayTeam</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Sport</dt>
+    <dd class="col-sm-9">@Model.Sport</dd>
+    <dt class="col-sm-3">Match Date</dt>
+    <dd class="col-sm-9">@Model.MatchDate.ToString("yyyy-MM-dd HH:mm")</dd>
+    <dt class="col-sm-3">Odds</dt>
+    <dd class="col-sm-9">Home @Model.HomeOdds / Away @Model.AwayOdds@(Model.DrawOdds.HasValue ? $" / Draw {Model.DrawOdds.Value}" : "")</dd>
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@(Model.IsActive ? "Active" : "Inactive")</dd>
+    <dt class="col-sm-3">Placed Bets</dt>
+    <dd class="col-sm-9">@Model.Bets.Count</dd>
+</dl>
+
+<a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.BetMatchId">Edit</a>
+<a class="btn btn-outline-secondary" asp-action="Index">Back to Matches</a>

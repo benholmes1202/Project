@@ -1,42 +1,28 @@
-﻿@model Project.Models.Bet
+@model Project.Models.Bet
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Bet Details";
 }
 
-<h1>Details</h1>
+<h1 class="h2">Bet Details</h1>
 
-<div>
-    <h4>Bet</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AccountId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AccountId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Amount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Amount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.BetId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<dl class="row">
+    <dt class="col-sm-3">Match</dt>
+    <dd class="col-sm-9">@(Model.BetMatch == null ? Model.Category : $"{Model.BetMatch.HomeTeam} vs {Model.BetMatch.AwayTeam}")</dd>
+    <dt class="col-sm-3">Account</dt>
+    <dd class="col-sm-9">@(Model.BettingAccount?.AccountNumber ?? Model.AccountId.ToString())</dd>
+    <dt class="col-sm-3">Selection</dt>
+    <dd class="col-sm-9">@Model.Selection</dd>
+    <dt class="col-sm-3">Stake</dt>
+    <dd class="col-sm-9">@Model.Amount.ToString("C")</dd>
+    <dt class="col-sm-3">Odds</dt>
+    <dd class="col-sm-9">@Model.Odds</dd>
+    <dt class="col-sm-3">Potential Payout</dt>
+    <dd class="col-sm-9">@Model.PotentialPayout.ToString("C")</dd>
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+    <dt class="col-sm-3">Placed</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+</dl>
+
+<a class="btn btn-outline-secondary" asp-action="Index">Back to Bets</a>

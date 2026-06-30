@@ -37,6 +37,8 @@ namespace Project
             builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
             builder.Services.AddScoped<IBettingAccountService, BettingAccountService>();
             builder.Services.AddScoped<IAccountTransactionService, AccountTransactionService>();
+            builder.Services.AddScoped<IBetMatchService, BetMatchService>();
+            builder.Services.AddScoped<IBetService, BetService>();
 
             var app = builder.Build();
 

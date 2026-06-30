@@ -14,6 +14,7 @@ namespace Project.Services
         }
         public DbSet<Models.ApplicationUser> AppUsers { get; set; }
         public DbSet<Models.Bet> Bets { get; set; }
+        public DbSet<Models.BetMatch> BetMatches { get; set; }
         public DbSet<Models.AccountTransaction> AccountTransactions { get; set; }
         public DbSet<Models.BettingAccount> BettingAccounts { get; set; }
         public DbSet<Models.TransactionType> TransactionTypes { get; set; }
@@ -172,9 +173,26 @@ namespace Project.Services
                     .IsRequired()
                     .HasMaxLength(100);
 
+                entity.Property(b => b.Selection)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
                 entity.Property(b => b.Amount)
                     .HasColumnType("decimal(16,2)")
                     .IsRequired();
+
+                entity.Property(b => b.Odds)
+                    .HasColumnType("decimal(16,2)")
+                    .IsRequired();
+
+                entity.Property(b => b.PotentialPayout)
+                    .HasColumnType("decimal(16,2)")
+                    .IsRequired();
+
+                entity.Property(b => b.Status)
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Placed");
 
                 entity.Property(b => b.CreatedAt)
                     .HasDefaultValueSql("GETDATE()");
@@ -183,10 +201,53 @@ namespace Project.Services
 
                 entity.HasIndex(b => b.Category);
 
+                entity.HasIndex(b => b.BetMatchId);
+
                 entity.HasOne(b => b.BettingAccount)
                     .WithMany(a => a.Bets)
                     .HasForeignKey(b => b.AccountId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(b => b.BetMatch)
+                    .WithMany(m => m.Bets)
+                    .HasForeignKey(b => b.BetMatchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<BetMatch>(entity =>
+            {
+                entity.HasKey(m => m.BetMatchId);
+
+                entity.Property(m => m.HomeTeam)
+                    .IsRequired()
+                    .HasMaxLength(120);
+
+                entity.Property(m => m.AwayTeam)
+                    .IsRequired()
+                    .HasMaxLength(120);
+
+                entity.Property(m => m.Sport)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(m => m.HomeOdds)
+                    .HasColumnType("decimal(16,2)");
+
+                entity.Property(m => m.AwayOdds)
+                    .HasColumnType("decimal(16,2)");
+
+                entity.Property(m => m.DrawOdds)
+                    .HasColumnType("decimal(16,2)");
+
+                entity.Property(m => m.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(m => m.UpdatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.HasIndex(m => m.MatchDate);
+                entity.HasIndex(m => m.IsActive);
+                entity.HasIndex(m => m.Sport);
             });
 
 

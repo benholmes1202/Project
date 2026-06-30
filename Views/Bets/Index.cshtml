@@ -1,53 +1,59 @@
-﻿@model IEnumerable<Project.Models.Bet>
+@model IEnumerable<Project.Models.Bet>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Bets";
 }
 
-<h1>Index</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h2 mb-1">Bets</h1>
+        <p class="text-muted mb-0">@(User.IsInRole("Admin") ? "All placed bets." : "Your placed bets.")</p>
+    </div>
+    @if (!User.IsInRole("Admin"))
+    {
+        <a class="btn btn-primary" asp-action="AvailableMatches">Place Bet</a>
+    }
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AccountId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.BetId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BetId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BetId">Delete</a>
-            </td>
-        </tr>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No bets have been placed yet.</div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Account</th>
+                    <th>Selection</th>
+                    <th>Stake</th>
+                    <th>Odds</th>
+                    <th>Potential Payout</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var bet in Model)
+                {
+                    <tr>
+                        <td>
+                            @(bet.BetMatch == null ? bet.Category : $"{bet.BetMatch.HomeTeam} vs {bet.BetMatch.AwayTeam}")
+                        </td>
+                        <td>@(bet.BettingAccount?.AccountNumber ?? bet.AccountId.ToString())</td>
+                        <td>@bet.Selection</td>
+                        <td>@bet.Amount.ToString("C")</td>
+                        <td>@bet.Odds</td>
+                        <td>@bet.PotentialPayout.ToString("C")</td>
+                        <td><span class="badge bg-info text-dark">@bet.Status</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@bet.BetId">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

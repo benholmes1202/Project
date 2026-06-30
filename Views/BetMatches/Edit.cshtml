@@ -1,0 +1,12 @@
+@model Project.ViewModels.BetMatches.BetMatchFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Match";
+}
+
+<h1 class="h2">Edit Match</h1>
+@await Html.PartialAsync("_Form", Model)
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

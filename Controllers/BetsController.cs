@@ -1,157 +1,156 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Project.Models;
 using Project.Services;
+using Project.ViewModels.Bets;
 
 namespace Project.Controllers
 {
+    [Authorize]
     public class BetsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IBetService _betService;
+        private readonly IBetMatchService _matchService;
 
-        public BetsController(ApplicationDbContext context)
+        public BetsController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            IBetService betService,
+            IBetMatchService matchService)
         {
             _context = context;
+            _userManager = userManager;
+            _betService = betService;
+            _matchService = matchService;
         }
 
-        // GET: Bets
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Bets.ToListAsync());
+            if (User.IsInRole("Admin"))
+            {
+                return View(await _betService.GetAllAsync());
+            }
+
+            var appUser = await GetCurrentApplicationUserAsync();
+            if (appUser == null)
+            {
+                TempData["ErrorMessage"] = "Your application profile could not be found.";
+                return RedirectToAction("MyProfile", "ApplicationUsers");
+            }
+
+            return View(await _betService.GetForUserAsync(appUser.UserId));
         }
 
-        // GET: Bets/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> AvailableMatches()
         {
-            if (id == null)
+            return View(await _matchService.GetActiveUpcomingAsync());
+        }
+
+        public async Task<IActionResult> Place(int matchId)
+        {
+            var appUser = await GetCurrentApplicationUserAsync();
+            if (appUser == null)
+            {
+                return Challenge();
+            }
+
+            var match = await _matchService.GetByIdAsync(matchId);
+            if (match == null || !match.IsActive)
             {
                 return NotFound();
             }
 
-            var bet = await _context.Bets
-                .FirstOrDefaultAsync(m => m.BetId == id);
-            if (bet == null)
+            await PopulateAccountsAsync(appUser.UserId);
+            ViewBag.Match = match;
+
+            return View(new PlaceBetViewModel
             {
-                return NotFound();
-            }
-
-            return View(bet);
+                BetMatchId = match.BetMatchId
+            });
         }
 
-        // GET: Bets/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Bets/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BetId,AccountId,Category,Amount,CreatedAt")] Bet bet)
+        public async Task<IActionResult> Place(PlaceBetViewModel model)
         {
-            if (ModelState.IsValid)
+            var appUser = await GetCurrentApplicationUserAsync();
+            if (appUser == null)
             {
-                _context.Add(bet);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return Challenge();
             }
-            return View(bet);
-        }
 
-        // GET: Bets/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
+            var match = await _matchService.GetByIdAsync(model.BetMatchId);
+            if (match == null)
             {
                 return NotFound();
             }
 
-            var bet = await _context.Bets.FindAsync(id);
-            if (bet == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
-            }
-            return View(bet);
-        }
-
-        // POST: Bets/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BetId,AccountId,Category,Amount,CreatedAt")] Bet bet)
-        {
-            if (id != bet.BetId)
-            {
-                return NotFound();
+                await PopulateAccountsAsync(appUser.UserId);
+                ViewBag.Match = match;
+                return View(model);
             }
 
-            if (ModelState.IsValid)
+            var result = await _betService.PlaceBetAsync(model, appUser.UserId);
+            if (!result.Succeeded)
             {
-                try
-                {
-                    _context.Update(bet);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BetExists(bet.BetId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(bet);
-        }
-
-        // GET: Bets/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Bet could not be placed.");
+                await PopulateAccountsAsync(appUser.UserId);
+                ViewBag.Match = match;
+                return View(model);
             }
 
-            var bet = await _context.Bets
-                .FirstOrDefaultAsync(m => m.BetId == id);
-            if (bet == null)
-            {
-                return NotFound();
-            }
-
-            return View(bet);
-        }
-
-        // POST: Bets/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var bet = await _context.Bets.FindAsync(id);
-            if (bet != null)
-            {
-                _context.Bets.Remove(bet);
-            }
-
-            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Bet placed successfully.";
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BetExists(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            return _context.Bets.Any(e => e.BetId == id);
+            var bet = await _betService.GetByIdAsync(id);
+            if (bet == null)
+            {
+                return NotFound();
+            }
+
+            if (!User.IsInRole("Admin"))
+            {
+                var appUser = await GetCurrentApplicationUserAsync();
+                if (appUser == null || bet.BettingAccount?.UserId != appUser.UserId)
+                {
+                    return Forbid();
+                }
+            }
+
+            return View(bet);
+        }
+
+        private async Task PopulateAccountsAsync(int userId)
+        {
+            var accounts = await _context.BettingAccounts
+                .AsNoTracking()
+                .Where(a => a.UserId == userId && a.Status == "Open")
+                .OrderBy(a => a.AccountNumber)
+                .Select(a => new
+                {
+                    a.AccountId,
+                    Display = a.AccountNumber + " - Balance: " + a.Balance
+                })
+                .ToListAsync();
+
+            ViewData["AccountId"] = new SelectList(accounts, "AccountId", "Display");
+        }
+
+        private async Task<Models.ApplicationUser?> GetCurrentApplicationUserAsync()
+        {
+            var identityUserId = _userManager.GetUserId(User);
+            return string.IsNullOrWhiteSpace(identityUserId)
+                ? null
+                : await _context.AppUsers.FirstOrDefaultAsync(u => u.IdentityUserId == identityUserId);
         }
     }
 }

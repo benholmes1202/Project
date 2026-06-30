@@ -1,0 +1,28 @@
+@model Project.Models.BetMatch
+
+@{
+    ViewData["Title"] = "Delete Match";
+    var hasBets = Model.Bets.Any();
+}
+
+<h1 class="h2">Delete Match</h1>
+
+<div class="alert @(hasBets ? "alert-danger" : "alert-warning")">
+    @(hasBets ? "This match has placed bets and cannot be deleted. Mark it inactive instead." : "Are you sure you want to delete this match?")
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Match</dt>
+    <dd class="col-sm-9">@Model.HomeTeam vs @Model.AwayTeam</dd>
+    <dt class="col-sm-3">Date</dt>
+    <dd class="col-sm-9">@Model.MatchDate.ToString("yyyy-MM-dd HH:mm")</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="BetMatchId" />
+    @if (!hasBets)
+    {
+        <button type="submit" class="btn btn-danger">Delete</button>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Index">Back to Matches</a>
+</form>

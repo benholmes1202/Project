@@ -87,6 +87,41 @@
                                     Admin Dashboard
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-semibold"
+                                       asp-area=""
+                                       asp-controller="BetMatches"
+                                       asp-action="Index">
+                                    Matches
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-warning fw-semibold"
+                                       asp-area=""
+                                       asp-controller="Bets"
+                                       asp-action="Index">
+                                    Bets
+                                </a>
+                            </li>
+                        }
+                        else if (isAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                       asp-area=""
+                                       asp-controller="MyBettingAccounts"
+                                       asp-action="Index">
+                                    My Accounts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                       asp-area=""
+                                       asp-controller="Bets"
+                                       asp-action="AvailableMatches">
+                                    Bet Matches
+                                </a>
+                            </li>
                         }
                     </ul>
 

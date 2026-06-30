@@ -1,0 +1,32 @@
+@model Project.ViewModels.BettingAccounts.BettingAccountFormViewModel
+
+@{
+    ViewData["Title"] = "Create Betting Account";
+}
+
+<h1 class="h2">Create Betting Account</h1>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="AccountNumber" class="form-label"></label>
+                <input asp-for="AccountNumber" class="form-control" />
+                <span asp-validation-for="AccountNumber" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CurrencyCode" class="form-label"></label>
+                <input asp-for="CurrencyCode" class="form-control" maxlength="3" />
+                <span asp-validation-for="CurrencyCode" class="text-danger"></span>
+            </div>
+            <div class="alert alert-info">Your new account starts open with a zero balance.</div>
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

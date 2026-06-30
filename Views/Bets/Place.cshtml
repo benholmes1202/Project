@@ -1,0 +1,62 @@
+@model Project.ViewModels.Bets.PlaceBetViewModel
+@{
+    ViewData["Title"] = "Place Bet";
+    var match = ViewBag.Match as Project.Models.BetMatch;
+}
+
+<h1 class="h2">Place Bet</h1>
+
+@if (match != null)
+{
+    <div class="alert alert-info">
+        <strong>@match.HomeTeam vs @match.AwayTeam</strong><br />
+        @match.Sport - @match.MatchDate.ToString("yyyy-MM-dd HH:mm")
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Place" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="BetMatchId" />
+
+            <div class="mb-3">
+                <label asp-for="AccountId" class="form-label"></label>
+                <select asp-for="AccountId" class="form-select" asp-items="ViewBag.AccountId">
+                    <option value="">Select an open account</option>
+                </select>
+                <span asp-validation-for="AccountId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Selection" class="form-label"></label>
+                <select asp-for="Selection" class="form-select">
+                    <option value="">Select outcome</option>
+                    @if (match != null)
+                    {
+                        <option value="Home">Home - @match.HomeTeam (@match.HomeOdds)</option>
+                        <option value="Away">Away - @match.AwayTeam (@match.AwayOdds)</option>
+                        @if (match.DrawOdds.HasValue)
+                        {
+                            <option value="Draw">Draw (@match.DrawOdds.Value)</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Selection" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Amount" class="form-label"></label>
+                <input asp-for="Amount" class="form-control" />
+                <span asp-validation-for="Amount" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Place Bet</button>
+            <a class="btn btn-outline-secondary" asp-action="AvailableMatches">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

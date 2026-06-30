@@ -74,6 +74,24 @@ namespace Project.Services
             return ServiceResult<int>.Success(account.AccountId);
         }
 
+        public async Task<IReadOnlyList<BettingAccount>> GetForUserAsync(int userId)
+        {
+            return await _context.BettingAccounts
+                .AsNoTracking()
+                .Include(a => a.AccountTransactions)
+                .Include(a => a.Bets)
+                .ThenInclude(b => b.BetMatch)
+                .Where(a => a.UserId == userId)
+                .OrderBy(a => a.AccountNumber)
+                .ToListAsync();
+        }
+
+        public async Task<ServiceResult<int>> CreateForUserAsync(BettingAccountFormViewModel model, int userId)
+        {
+            model.UserId = userId;
+            return await CreateAsync(model);
+        }
+
         public async Task<ServiceResult> UpdateAsync(BettingAccountFormViewModel model)
         {
             var account = await _context.BettingAccounts.FindAsync(model.AccountId);
@@ -122,6 +140,19 @@ namespace Project.Services
             await _context.SaveChangesAsync();
 
             return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> CloseForUserAsync(int id, int userId)
+        {
+            var accountBelongsToUser = await _context.BettingAccounts
+                .AnyAsync(a => a.AccountId == id && a.UserId == userId);
+
+            if (!accountBelongsToUser)
+            {
+                return ServiceResult.Failure("Account could not be found.");
+            }
+
+            return await CloseAsync(id);
         }
 
         public async Task<ServiceResult> ReopenAsync(int id)

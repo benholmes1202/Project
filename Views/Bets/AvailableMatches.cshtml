@@ -1,0 +1,48 @@
+@model IEnumerable<Project.Models.BetMatch>
+
+@{
+    ViewData["Title"] = "Available Matches";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <div>
+        <h1 class="h2 mb-1">Available Matches</h1>
+        <p class="text-muted mb-0">Choose an active upcoming match to place a bet.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-controller="MyBettingAccounts" asp-action="Index">My Accounts</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">There are no active upcoming matches available right now.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var match in Model)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">@match.Sport - @match.MatchDate.ToString("yyyy-MM-dd HH:mm")</div>
+                        <h2 class="h5 mt-2">@match.HomeTeam vs @match.AwayTeam</h2>
+                        <dl class="row mt-3 mb-0">
+                            <dt class="col-6">Home</dt>
+                            <dd class="col-6">@match.HomeOdds</dd>
+                            <dt class="col-6">Away</dt>
+                            <dd class="col-6">@match.AwayOdds</dd>
+                            @if (match.DrawOdds.HasValue)
+                            {
+                                <dt class="col-6">Draw</dt>
+                                <dd class="col-6">@match.DrawOdds.Value</dd>
+                            }
+                        </dl>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a class="btn btn-primary w-100" asp-action="Place" asp-route-matchId="@match.BetMatchId">Place Bet</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

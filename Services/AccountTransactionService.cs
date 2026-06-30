@@ -79,6 +79,69 @@ namespace Project.Services
             return ServiceResult<int>.Success(accountTransaction.TransactionId);
         }
 
+        public async Task<ServiceResult<int>> CreateUserMoneyMovementAsync(
+            int accountId,
+            int userId,
+            decimal amount,
+            string transactionTypeName)
+        {
+            if (amount <= 0m)
+            {
+                return ServiceResult<int>.Failure("Amount must be greater than zero.");
+            }
+
+            var account = await _context.BettingAccounts
+                .FirstOrDefaultAsync(a => a.AccountId == accountId && a.UserId == userId);
+
+            if (account == null)
+            {
+                return ServiceResult<int>.Failure("Account could not be found.");
+            }
+
+            if (!account.Status.Equals("Open", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<int>.Failure("Money can only be moved on open accounts.");
+            }
+
+            var transactionType = await _context.TransactionTypes
+                .FirstOrDefaultAsync(t => t.Name == transactionTypeName && t.IsActive);
+
+            if (transactionType == null)
+            {
+                return ServiceResult<int>.Failure($"{transactionTypeName} transaction type is missing.");
+            }
+
+            if (transactionType.BalanceEffect < 0 && account.Balance < amount)
+            {
+                return ServiceResult<int>.Failure("Insufficient funds for this withdrawal.");
+            }
+
+            var now = DateTime.UtcNow;
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var accountTransaction = new AccountTransaction
+            {
+                AccountId = account.AccountId,
+                TransactionTypeId = transactionType.TransactionTypeId,
+                Amount = amount,
+                TransactionDate = DateTime.Today,
+                CaptureDate = now,
+                Reference = transactionTypeName,
+                Notes = $"User {transactionTypeName.ToLowerInvariant()}",
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            account.Balance += amount * transactionType.BalanceEffect;
+            account.UpdatedAt = now;
+
+            _context.AccountTransactions.Add(accountTransaction);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return ServiceResult<int>.Success(accountTransaction.TransactionId);
+        }
+
         public async Task<ServiceResult> UpdateAsync(AccountTransactionFormViewModel model)
         {
             var existingTransaction = await _context.AccountTransactions

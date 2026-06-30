@@ -1,0 +1,53 @@
+@model Project.ViewModels.BetMatches.BetMatchFormViewModel
+
+<div class="row">
+    <div class="col-md-7 col-lg-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="BetMatchId" />
+            <div class="mb-3">
+                <label asp-for="HomeTeam" class="form-label"></label>
+                <input asp-for="HomeTeam" class="form-control" />
+                <span asp-validation-for="HomeTeam" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="AwayTeam" class="form-label"></label>
+                <input asp-for="AwayTeam" class="form-control" />
+                <span asp-validation-for="AwayTeam" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Sport" class="form-label"></label>
+                <input asp-for="Sport" class="form-control" />
+                <span asp-validation-for="Sport" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MatchDate" class="form-label"></label>
+                <input asp-for="MatchDate" class="form-control" />
+                <span asp-validation-for="MatchDate" class="text-danger"></span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="HomeOdds" class="form-label"></label>
+                    <input asp-for="HomeOdds" class="form-control" />
+                    <span asp-validation-for="HomeOdds" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="AwayOdds" class="form-label"></label>
+                    <input asp-for="AwayOdds" class="form-control" />
+                    <span asp-validation-for="AwayOdds" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="DrawOdds" class="form-label"></label>
+                    <input asp-for="DrawOdds" class="form-control" />
+                    <span asp-validation-for="DrawOdds" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-check my-3">
+                <input asp-for="IsActive" class="form-check-input" />
+                <label asp-for="IsActive" class="form-check-label"></label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>
