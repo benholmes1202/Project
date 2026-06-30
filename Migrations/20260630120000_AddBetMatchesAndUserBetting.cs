@@ -1,10 +1,14 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Project.Services;
 
 #nullable disable
 
 namespace Project.Migrations
 {
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260630120000_AddBetMatchesAndUserBetting")]
     public partial class AddBetMatchesAndUserBetting : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
