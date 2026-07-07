@@ -88,6 +88,101 @@ namespace Project.Services
             return ServiceResult.Success();
         }
 
+        public async Task<ServiceResult> ResultMatchAsync(ResultMatchViewModel model)
+        {
+            var match = await _context.BetMatches
+                .Include(m => m.Bets)
+                .ThenInclude(b => b.BettingAccount)
+                .FirstOrDefaultAsync(m => m.BetMatchId == model.BetMatchId);
+
+            if (match == null)
+            {
+                return ServiceResult.Failure("Match could not be found.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(match.WinningSelection))
+            {
+                return ServiceResult.Failure("This match has already been resulted.");
+            }
+
+            var winningSelection = model.WinningSelection.Trim();
+            if (!IsValidSelection(match, winningSelection))
+            {
+                return ServiceResult.Failure("Please choose a valid winning selection for this match.");
+            }
+
+            var creditType = await _context.TransactionTypes.FirstOrDefaultAsync(t => t.Name == "Credit");
+            if (creditType == null)
+            {
+                return ServiceResult.Failure("Credit transaction type is missing.");
+            }
+
+            var now = DateTime.UtcNow;
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            match.WinningSelection = winningSelection;
+            match.ResultedAt = now;
+            match.IsActive = false;
+            match.UpdatedAt = now;
+
+            foreach (var bet in match.Bets.Where(b => b.Status == "Placed"))
+            {
+                var isWinner = bet.Selection.Equals(winningSelection, StringComparison.OrdinalIgnoreCase);
+
+                if (isWinner)
+                {
+                    bet.Status = "Won";
+
+                    if (bet.BettingAccount != null)
+                    {
+                        bet.BettingAccount.Balance += bet.PotentialPayout;
+                        bet.BettingAccount.UpdatedAt = now;
+
+                        _context.AccountTransactions.Add(new AccountTransaction
+                        {
+                            AccountId = bet.AccountId,
+                            TransactionTypeId = creditType.TransactionTypeId,
+                            RelatedBetId = bet.BetId,
+                            Amount = bet.PotentialPayout,
+                            TransactionDate = DateTime.Today,
+                            CaptureDate = now,
+                            Reference = $"Payout Bet #{bet.BetId}",
+                            Notes = $"Winning payout for {match.HomeTeam} vs {match.AwayTeam}",
+                            CreatedAt = now,
+                            UpdatedAt = now
+                        });
+                    }
+
+                    _context.BetSettlements.Add(new BetSettlement
+                    {
+                        BetId = bet.BetId,
+                        SettledAt = now,
+                        PayoutAmount = bet.PotentialPayout,
+                        ProfitLoss = bet.PotentialPayout - bet.Amount,
+                        Result = "Won"
+                    });
+                }
+                else
+                {
+                    bet.Status = "Lost";
+
+                    _context.BetSettlements.Add(new BetSettlement
+                    {
+                        BetId = bet.BetId,
+                        SettledAt = now,
+                        PayoutAmount = 0m,
+                        ProfitLoss = -bet.Amount,
+                        Result = "Lost"
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return ServiceResult.Success();
+        }
+
         public async Task<ServiceResult> DeleteAsync(int id)
         {
             var match = await _context.BetMatches
@@ -107,6 +202,13 @@ namespace Project.Services
             _context.BetMatches.Remove(match);
             await _context.SaveChangesAsync();
             return ServiceResult.Success();
+        }
+
+        private static bool IsValidSelection(BetMatch match, string selection)
+        {
+            return selection == "Home" ||
+                   selection == "Away" ||
+                   (selection == "Draw" && match.DrawOdds.HasValue);
         }
     }
 }

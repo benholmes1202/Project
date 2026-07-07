@@ -98,6 +98,53 @@ namespace Project.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        public async Task<IActionResult> Result(int id)
+        {
+            var match = await _service.GetByIdAsync(id);
+            if (match == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrWhiteSpace(match.WinningSelection))
+            {
+                TempData["ErrorMessage"] = "This match has already been resulted.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            return View(new ResultMatchViewModel
+            {
+                BetMatchId = match.BetMatchId,
+                MatchName = $"{match.HomeTeam} vs {match.AwayTeam}",
+                HasDrawOdds = match.DrawOdds.HasValue
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Result(int id, ResultMatchViewModel model)
+        {
+            if (id != model.BetMatchId)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result = await _service.ResultMatchAsync(model);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Match could not be resulted.");
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Match resulted and bets settled successfully.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         public async Task<IActionResult> Delete(int id)
         {
             var match = await _service.GetByIdAsync(id);

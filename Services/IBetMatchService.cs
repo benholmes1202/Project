@@ -10,6 +10,7 @@ namespace Project.Services
         Task<BetMatch?> GetByIdAsync(int id);
         Task<ServiceResult<int>> CreateAsync(BetMatchFormViewModel model);
         Task<ServiceResult> UpdateAsync(BetMatchFormViewModel model);
+        Task<ServiceResult> ResultMatchAsync(ResultMatchViewModel model);
         Task<ServiceResult> DeleteAsync(int id);
     }
 }

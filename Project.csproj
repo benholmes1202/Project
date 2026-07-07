@@ -19,4 +19,17 @@
     <PackageReference Include="NuGet.Protocol" Version="7.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Project.Tests\**\*.cs" />
+    <Content Remove="Project.Tests\**\*" />
+    <None Remove="Project.Tests\**\*" />
+    <EmbeddedResource Remove="Project.Tests\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

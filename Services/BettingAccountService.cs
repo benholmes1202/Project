@@ -134,6 +134,14 @@ namespace Project.Services
                 return ServiceResult.Failure("An account can only be closed when the outstanding balance is zero.");
             }
 
+            var hasOpenBets = await _context.Bets
+                .AnyAsync(b => b.AccountId == id && b.Status == "Placed");
+
+            if (hasOpenBets)
+            {
+                return ServiceResult.Failure("An account with unsettled bets cannot be closed.");
+            }
+
             account.Status = ClosedStatus;
             account.ClosedAt = DateTime.UtcNow;
             account.UpdatedAt = DateTime.UtcNow;

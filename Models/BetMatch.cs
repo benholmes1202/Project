@@ -33,6 +33,11 @@ namespace Project.Models
 
         public bool IsActive { get; set; } = true;
 
+        [StringLength(20)]
+        public string? WinningSelection { get; set; }
+
+        public DateTime? ResultedAt { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }

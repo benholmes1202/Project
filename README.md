@@ -42,6 +42,7 @@ On startup the application seeds:
 ## Verification Checklist
 
 - `dotnet build` succeeds.
+- `dotnet test Project.Tests\Project.Tests.csproj` succeeds.
 - Register/login/logout works.
 - Admin can create, search, edit, view, and delete eligible users.
 - Admin can create an account only for an existing user.
@@ -53,3 +54,8 @@ On startup the application seeds:
 - Future transaction dates and zero/negative amounts are rejected.
 - Accounts with non-zero balances cannot be closed.
 - Contact form saves a message and displays a success message.
+
+## Additional Documentation
+
+- See `PROJECT_DOCUMENTATION.md` for workflow and architecture notes.
+- See `TESTING.md` for automated and manual test coverage.

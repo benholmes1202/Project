@@ -1,0 +1,41 @@
+@model Project.ViewModels.BetMatches.ResultMatchViewModel
+
+@{
+    ViewData["Title"] = "Result Match";
+}
+
+<h1 class="h2">Result Match</h1>
+
+<div class="alert alert-warning">
+    Resulting <strong>@Model.MatchName</strong> will settle every placed bet for this match. Winning bets will be paid into the player's betting account.
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Result" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="BetMatchId" />
+            <input type="hidden" asp-for="MatchName" />
+            <input type="hidden" asp-for="HasDrawOdds" />
+            <div class="mb-3">
+                <label asp-for="WinningSelection" class="form-label"></label>
+                <select asp-for="WinningSelection" class="form-select">
+                    <option value="">Select winner</option>
+                    <option value="Home">Home</option>
+                    <option value="Away">Away</option>
+                    @if (Model.HasDrawOdds)
+                    {
+                        <option value="Draw">Draw</option>
+                    }
+                </select>
+                <span asp-validation-for="WinningSelection" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Settle Bets</button>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.BetMatchId">Cancel</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
