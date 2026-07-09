@@ -589,7 +589,6 @@ dotnet test --collect:"XPlat Code Coverage"
 * No live sports provider is connected.
 * The application is not intended for real-money gambling.
 * Production auditing and monitoring are limited.
-* Responsible-gambling controls are not fully implemented.
 
 ---
 
