@@ -190,13 +190,13 @@ Phase 6: Testing and Documentation
 
 The following diagram shows the main actions available to users and administrators.
 
-![Use case diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Use Case diagram.png)
+![Use case diagram](Images\Use Case diagram.png)
 
 ## 9. Application Architecture
 
 The project follows the ASP.NET Core MVC pattern with a service layer.
 
-![High-Level Architecture Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\High-Level Architecture Diagram.png)
+![High-Level Architecture Diagram](Images\High-Level Architecture Diagram.png)
 
 ### Layer Responsibilities
 
@@ -316,11 +316,11 @@ Important fields may include:
 
 ## 11. Entity-Relationship Diagram
 
-![Entity-Relationship Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Entity-Relationship Diagram.png)
+![Entity-Relationship Diagram](Images\Entity-Relationship Diagram.png)
 
 ## 12. UML Class Diagram
 
-![UML Class Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\UML Class Diagram.png)
+![UML Class Diagram](Images\UML Class Diagram.png)
 
 ## 13. Core Business Rules
 
@@ -374,11 +374,11 @@ Important fields may include:
 
 ## 14. Bet Placement Sequence Diagram
 
-![Place Bet Sequence Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Place Bet Sequence Diagram.png)
+![Place Bet Sequence Diagram](Images\Place Bet Sequence Diagram.png)
 
 ## 15. Match Settlement Sequence Diagram
 
-![Result Match Sequence Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Result Match Sequence Diagram.png)
+![Result Match Sequence Diagram](Images\Result Match Sequence Diagram.png)
 
 ## 16. Important Services
 
