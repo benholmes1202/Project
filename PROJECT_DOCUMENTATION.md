@@ -190,13 +190,13 @@ Phase 6: Testing and Documentation
 
 The following diagram shows the main actions available to users and administrators.
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Use Case diagram.png")
+![Use case diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Use Case diagram.png)
 
 ## 9. Application Architecture
 
 The project follows the ASP.NET Core MVC pattern with a service layer.
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\High-Level Architecture Diagram.png")
+![High-Level Architecture Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\High-Level Architecture Diagram.png)
 
 ### Layer Responsibilities
 
@@ -316,11 +316,11 @@ Important fields may include:
 
 ## 11. Entity-Relationship Diagram
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Entity-Relationship Diagram.png")
+![Entity-Relationship Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Entity-Relationship Diagram.png)
 
 ## 12. UML Class Diagram
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\UML Class Diagram.png")
+![UML Class Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\UML Class Diagram.png)
 
 ## 13. Core Business Rules
 
@@ -374,11 +374,11 @@ Important fields may include:
 
 ## 14. Bet Placement Sequence Diagram
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Place Bet Sequence Diagram.png")
+![Place Bet Sequence Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Place Bet Sequence Diagram.png)
 
 ## 15. Match Settlement Sequence Diagram
 
-![Alt text]("C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Result Match Sequence Diagram.png")
+![Result Match Sequence Diagram](C:\Users\BenjaminH\Documents\Learnership\ASP.NET CORE MVC\Diagrams\Result Match Sequence Diagram.png)
 
 ## 16. Important Services
 
@@ -609,27 +609,3 @@ Possible improvements include:
 * Improved automated testing
 * Continuous integration and deployment
 
----
-
-## 23. Disclaimer
-
-This project is intended for educational and demonstration purposes.
-
-It is not a production-ready gambling platform and should not be used for real-money betting without appropriate legal, financial, security, regulatory, privacy, and responsible-gambling controls.
-
-
-Then restart the application.
-
-diagrams (to use marked with *):
-	1. use case diagram
-	2. high level architechure diagram
-	3. UML class diagram
-	4. ERD
-	5. User Registration Sequence Diagram
-	6. Login Sequence Diagram
-	7. Deposit Sequence Diagram
-	8. Withdrawal Sequence Diagram
-	9. Place Bet Sequence Diagram
-	10. View My Bets Sequence Diagram
-	11. Result Match Sequence Diagram
-	12. Close Betting Account Sequence Diagram
