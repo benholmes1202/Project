@@ -190,7 +190,7 @@ Phase 6: Testing and Documentation
 
 The following diagram shows the main actions available to users and administrators.
 
-![Use case diagram](Images/Use Case diagram.png)
+![Use case diagram](Project/Images/Use Case diagram.png)
 
 ## 9. Application Architecture
 
