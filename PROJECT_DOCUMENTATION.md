@@ -190,13 +190,15 @@ Phase 6: Testing and Documentation
 
 The following diagram shows the main actions available to users and administrators.
 
-![Use case diagram](Project/Images/Use Case diagram.png)
+<img width="367" height="2556" alt="Use Case diagram" src="https://github.com/user-attachments/assets/14aba14f-dafa-46f5-a534-11ef573ffa52" />
+
 
 ## 9. Application Architecture
 
 The project follows the ASP.NET Core MVC pattern with a service layer.
 
-![High-Level Architecture Diagram](Images/High-Level Architecture Diagram.png)
+<img width="705" height="523" alt="High-Level Architecture Diagram" src="https://github.com/user-attachments/assets/3003ce26-0c25-49ce-9b41-5ee13a8fc0bd" />
+
 
 ### Layer Responsibilities
 
@@ -316,11 +318,13 @@ Important fields may include:
 
 ## 11. Entity-Relationship Diagram
 
-![Entity-Relationship Diagram](Images/Entity-Relationship Diagram.png)
+<img width="1780" height="2353" alt="Entity-Relationship Diagram" src="https://github.com/user-attachments/assets/c259da98-2962-4359-b82a-c794c8606dd6" />
+
 
 ## 12. UML Class Diagram
 
-![UML Class Diagram](Images/UML Class Diagram.png)
+<img width="1780" height="1768" alt="UML Class Diagram" src="https://github.com/user-attachments/assets/45432594-2dba-4854-bf0f-343dc84da638" />
+
 
 ## 13. Core Business Rules
 
@@ -374,11 +378,13 @@ Important fields may include:
 
 ## 14. Bet Placement Sequence Diagram
 
-![Place Bet Sequence Diagram](Images/Place Bet Sequence Diagram.png)
+<img width="1538" height="2145" alt="Place Bet Sequence Diagram" src="https://github.com/user-attachments/assets/550243b8-0c1d-4666-9b85-cf00b6d8b3e6" />
+
 
 ## 15. Match Settlement Sequence Diagram
 
-![Result Match Sequence Diagram](Images/Result Match Sequence Diagram.png)
+<img width="1393" height="1869" alt="Result Match Sequence Diagram" src="https://github.com/user-attachments/assets/335e685e-964c-4bbf-a982-da3f9a117281" />
+
 
 ## 16. Important Services
 
